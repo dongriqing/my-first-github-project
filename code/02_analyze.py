@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 02_analyze.py
-把 posts.csv 算成一份 stats.json，供看板前端直接读取。
-所有图表要用的数字都在这里算完，前端只负责画。
+把 data/posts.csv 算成 data/stats.json，供 app.py 直接读取。
+图表要用到的数字都在这里算完，app.py 只负责画。
 """
 import os
 import json

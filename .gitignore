@@ -1,3 +1,16 @@
-.env
+# 本地环境
 .venv/
+venv/
+.env
+.streamlit/secrets.toml
+
+# Python 缓存
 __pycache__/
+*.py[cod]
+
+# 脚本运行产物（CSV 与 stats.json 是要提交的，这里只挡临时库）
+data/posts.db
+
+# 系统文件
+.DS_Store
+Thumbs.db

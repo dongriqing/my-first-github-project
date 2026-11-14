@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """
 01_make_dataset.py
-生成调研用的小红书风格笔记数据集（示例数据集），并写入 CSV 与 SQLite。
+生成调研用的小红书风格笔记数据集（示例数据集），写入 data/posts.csv，另存一份 SQLite。
 
 说明：本脚本产出的是演示用样本，用于在没有真实采集结果时跑通全流程。
-真实数据到位后，用 01b_import_real.py 导入，字段结构完全一致，
-后续 02/03/04 三个脚本不用改一行。
+随机种子固定，重跑得到的数据和仓库里那份一致。
+真实数据到位后，把采集结果整理成同样的字段写进 posts.csv 即可，
+后面的 02_analyze.py 和 app.py 一行都不用改。
+注意：重跑会覆盖 data/ 里现有的 posts.csv。
 """
 import random
 import hashlib

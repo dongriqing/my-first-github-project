@@ -77,6 +77,15 @@ streamlit run app.py
 
 浏览器会自己打开 `http://localhost:8501`。不需要任何密钥，不联网也能跑。
 
+想自己验一遍数字是怎么来的，按顺序跑这两个脚本：
+
+```bash
+python code/01_make_dataset.py   # 重新生成 data/posts.csv
+python code/02_analyze.py        # 重新计算 data/stats.json
+```
+
+随机种子固定，重跑出来的 `posts.csv` 和仓库里那份逐字节相同；`stats.json` 除了开头记录的生成时间，其余完全一致。也就是说页面上的每个数字都能从 CSV 一路算回来，不是手工填的。
+
 ## 目录结构
 
 ```
@@ -85,12 +94,13 @@ streamlit run app.py
 ├── README.md               # 本文件
 ├── 标注手册.md              # 五类怎么判、边界案例、一致性怎么算
 ├── images/                 # README 里用的三张界面截图
+├── .streamlit/config.toml  # 主题色，白色底 + 赭红主色
 ├── data/
 │   ├── posts.csv           # 1200 条结构化笔记（示例数据）
-│   └── stats.json          # 统计结果，前端直接读
+│   └── stats.json          # 统计结果，app.py 直接读
 └── code/
-    ├── 01_make_dataset.py  # 生成/导入数据，写 CSV 与 SQLite
-    └── 02_analyze.py       # 分周、分词、热力图矩阵、危机计数
+    ├── 01_make_dataset.py  # 生成示例数据，写 posts.csv（另存一份 SQLite 方便查询）
+    └── 02_analyze.py       # 分周、分词、热力图矩阵、危机计数，写 stats.json
 ```
 
 ## 云端部署
