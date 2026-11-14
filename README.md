@@ -4,6 +4,8 @@
 
 《数据分析与可视化》课程个人项目 · 西南财经大学 · 丁瑞祺（42512098）
 
+线上版本：https://dongriqing-emotion.streamlit.app
+
 ---
 
 ## 这是什么
