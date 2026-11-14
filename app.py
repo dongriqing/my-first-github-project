@@ -91,7 +91,7 @@ if page.startswith("①"):
                 fillcolor=COLORS[l], hovertemplate=f"{l}<br>%{{x}}：%{{y}} 条<extra></extra>"))
         base_layout(fig, height=400, showlegend=True,
                     legend=dict(orientation="h", y=-0.16, font=dict(size=11)))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with right:
         st.markdown("**五类说法的占比**")
@@ -103,7 +103,7 @@ if page.startswith("①"):
             hovertemplate="%{y}：%{x}%<extra></extra>"))
         fig.update_xaxes(range=[0, 36], showgrid=True, gridcolor=GRID)
         base_layout(fig, height=250)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
         st.markdown("**最近两周 vs 前两周**")
         dl = pd.DataFrame(S["delta"])
@@ -116,7 +116,7 @@ if page.startswith("①"):
         fig.update_xaxes(range=[-22, 46], showgrid=True, gridcolor=GRID, zeroline=True,
                          zerolinecolor="#d7d0c0")
         base_layout(fig, height=250)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     st.divider()
     a, b = st.columns([1.4, 1])
@@ -137,7 +137,7 @@ if page.startswith("①"):
                           yaxis2=dict(title="平均严重度", overlaying="y", side="right",
                                       showgrid=False, range=[1.6, 2.1], dtick=0.1,
                                       tickformat=".1f"))
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
     with b:
         st.markdown("**这段时间里发生了什么**")
         peak = max(S["week_series"], key=lambda d: d["total"])
@@ -178,7 +178,7 @@ elif page.startswith("②"):
             fill="tozeroy", fillcolor=rgba(c, 0.12),
             hovertemplate="%{x}：%{y} 条<extra></extra>"))
         base_layout(fig, height=250)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
         st.markdown("**严重程度分布**")
         fig = go.Figure(go.Bar(
@@ -187,7 +187,7 @@ elif page.startswith("②"):
             text=[f"{v}" for v in d["sev"]], textposition="outside",
             hovertemplate="%{x}：%{y} 条<extra></extra>"))
         base_layout(fig, height=230)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with right:
         st.markdown("**这一类的常见用词**")
@@ -199,7 +199,7 @@ elif page.startswith("②"):
         fig.update_xaxes(showgrid=True, gridcolor=GRID,
                          range=[0, w["n"].max() * 1.2])
         base_layout(fig, height=330)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
         tot = sum(d["sev"]) or 1
         sev3 = d["sev"][2] / tot * 100
@@ -237,7 +237,7 @@ else:
             hovertemplate="%{y} · %{x}：%{z} 条<extra></extra>",
             colorbar=dict(title="条数", thickness=10, len=0.7)))
         base_layout(fig, height=340)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with right:
         st.markdown("**危机信号 · 每周条数**")
@@ -247,7 +247,7 @@ else:
             text=cw["n"], textposition="outside",
             hovertemplate="%{x}：%{y} 条<extra></extra>"))
         base_layout(fig, height=340)
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
         cs = S["crisis"]
         st.caption(f"十二周共 {cs['total']} 条带危机信号，占 {k['crisis_pct']}%，"
