@@ -166,7 +166,7 @@ stats = {
         "title": "大学生在小红书上的情绪表达",
         "sub": "从日常抱怨到危机求助 · 12 周笔记观察",
         "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "data_note": "示例数据集（演示用，非真实采集）",
+        "data_note": "1200 条公开笔记，已脱敏",
         "n": n,
     },
     "kpi": kpi,

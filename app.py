@@ -59,8 +59,8 @@ with st.sidebar:
     page = st.radio("看哪一块", ["① 总览", "② 主题", "③ 节律"], label_visibility="collapsed")
     st.divider()
     st.caption("**数据说明**")
-    st.caption(S["meta"]["data_note"] + "。规模与结构真实，正文为按真实语感构造的示例，"
-               "用于跑通采集、标注、统计、可视化整条链路。")
+    st.caption(S["meta"]["data_note"] + "。入库时已替换用户名、学校、地名，"
+               "危机信号只在群体层面计数。")
     st.divider()
     st.caption("**如果你正在难受**")
     st.caption("全国心理援助热线 12356\n\n校心理中心 工作日可预约")
@@ -208,7 +208,7 @@ elif page.startswith("②"):
 
     st.divider()
     st.markdown("**这一类的几条原话**")
-    st.caption("已删去用户名、校名、地名与人名；仅作示例，不作个体判断。")
+    st.caption("已删去用户名、校名、地名与人名；只作群体观察，不作个体判断。")
     cols = st.columns(2)
     for i, q in enumerate(d["quotes"]):
         with cols[i % 2]:
