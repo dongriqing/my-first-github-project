@@ -21,7 +21,7 @@ df = pd.read_csv(os.path.join(DATA, "posts.csv"))
 df["dt"] = pd.to_datetime(df["publish_time"])
 
 # 统一到"第几周"，起点是第一周的周一
-start = datetime(2026, 8, 24)
+start = datetime(2026, 9, 1)
 df["week"] = ((df["dt"] - start).dt.days // 7 + 1).clip(lower=1, upper=12)
 
 LABELS = ["直接说情绪", "说身体", "自嘲和反讽", "和别人比", "求助或告别"]
@@ -144,6 +144,7 @@ for l in LABELS:
         "n": int(len(sub)),
         "words": top,
         "sev": sev,
+        "heavy_pct": round(sev[2] / len(sub) * 100, 1) if len(sub) else 0,
         "quotes": q[:5],
         "week": [r["by_label"][l] for r in week_series],
         "avg_len": round(float(sub["char_len"].mean()), 1),
@@ -166,7 +167,7 @@ stats = {
         "title": "大学生在小红书上的情绪表达",
         "sub": "从日常抱怨到危机求助 · 12 周笔记观察",
         "generated": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "data_note": "1200 条公开笔记，已脱敏",
+        "data_note": f"{n} 条公开笔记（{df['dt'].min():%Y-%m-%d} 至 {df['dt'].max():%Y-%m-%d}），已脱敏",
         "n": n,
     },
     "kpi": kpi,

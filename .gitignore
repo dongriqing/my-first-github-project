@@ -11,6 +11,11 @@ __pycache__/
 # 脚本运行产物（CSV 与 stats.json 是要提交的，这里只挡临时库）
 data/posts.db
 
+# 抓取原始件与中间产物：含作者昵称，不进仓库
+data/raw/
+data/real_posts.csv
+data/posts_fake_1200.csv
+
 # 系统文件
 .DS_Store
 Thumbs.db
