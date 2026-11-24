@@ -55,7 +55,7 @@ def base_layout(fig, height=380, **kw):
 # ---------------------------------------------------------------- 侧栏
 with st.sidebar:
     st.markdown("### 情绪笔记")
-    st.caption(f"大学生在小红书上的情绪表达\n\n12 周 · {S['meta']['n']} 条笔记")
+    st.caption(f"大学生在小红书上的情绪表达\n\n{S['meta']['n']} 条笔记 · 近 12 个月走势")
     page = st.radio("看哪一块", ["① 总览", "② 主题", "③ 节律"], label_visibility="collapsed")
     st.divider()
     st.caption("**数据说明**")
@@ -69,11 +69,12 @@ k = S["kpi"]
 
 # ---------------------------------------------------------------- ① 总览
 if page.startswith("①"):
-    st.markdown("## 总览 · 最近十二周整体在什么位置")
+    st.markdown("## 总览 · 这批笔记整体在什么位置")
     st.caption(f"数据范围 {k['span']}　·　文档生成于 {S['meta']['generated']}")
-    st.caption("数据来自小红书公开笔记页：用第一人称情绪词检索，逐条点开读正文后入库。"
-               "累计抓取 879 条，其中发布于 9 月 1 日之后的 364 条纳入本周度分析，"
-               "教辅、影视、营销科普类已剔除。")
+    st.caption(f"数据来自小红书公开笔记页：用第一人称情绪词检索，逐条点开读正文后入库。"
+               f"累计抓到 879 条，剔掉教辅、影视、营销科普和只剩话题标签的，"
+               f"可用 {k['notes']} 条，全部纳入这里的统计。")
+    st.caption(S["meta"]["trend_note"])
 
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("笔记总量", f"{k['notes']:,} 条")
@@ -81,15 +82,15 @@ if page.startswith("①"):
     c3.metric("重度表达占比", f"{k['sev3_pct']}%")
     c4.metric("危机信号笔记", f"{k['crisis']} 条")
 
-    ws = pd.DataFrame(S["week_series"])
+    ws = pd.DataFrame(S["month_series"])
     left, right = st.columns([1.55, 1])
 
     with left:
-        st.markdown("**每周笔记量 · 按说法拆分**")
+        st.markdown("**每月笔记量 · 按说法拆分**")
         fig = go.Figure()
         for l in LABELS:
             fig.add_trace(go.Scatter(
-                x=[f"W{w}" for w in ws["week"]], y=[d[l] for d in ws["by_label"]],
+                x=ws["label"], y=[d[l] for d in ws["by_label"]],
                 name=l, mode="lines", stackgroup="one", line=dict(width=0.6, color=COLORS[l]),
                 fillcolor=COLORS[l], hovertemplate=f"{l}<br>%{{x}}：%{{y}} 条<extra></extra>"))
         base_layout(fig, height=400, showlegend=True,
@@ -126,17 +127,18 @@ if page.startswith("①"):
     a, b = st.columns([1.4, 1])
     with a:
         st.markdown("**情绪强度 · 均值与重度占比**")
-        sev = [d["sev_mean"] for d in S["week_series"]]
-        heavy = [d["heavy_pct"] for d in S["week_series"]]
+        sev = [d["sev_mean"] for d in S["month_series"]]
+        heavy = [d["heavy_pct"] for d in S["month_series"]]
         fig = go.Figure()
-        fig.add_trace(go.Bar(x=[f"W{w}" for w in ws["week"]], y=heavy, name="重度占比(%)",
+        fig.add_trace(go.Bar(x=ws["label"], y=heavy, name="重度占比(%)",
                              marker_color="#e0cdb4", hovertemplate="%{x} 重度 %{y}%<extra></extra>"))
-        fig.add_trace(go.Scatter(x=[f"W{w}" for w in ws["week"]], y=sev, name="平均严重度",
+        fig.add_trace(go.Scatter(x=ws["label"], y=sev, name="平均严重度",
                                  mode="lines+markers", line=dict(color="#8c2f39", width=2.2),
                                  marker=dict(size=6), yaxis="y2",
                                  hovertemplate="%{x} 均值 %{y:.2f}<extra></extra>"))
         base_layout(fig, height=330, showlegend=True,
                     legend=dict(orientation="h", y=1.1, font=dict(size=11)))
+        fig.update_xaxes(tickmode="array", tickvals=list(ws["label"])[::2])
         smin, smax = min(sev), max(sev)
         pad = max(0.08, (smax - smin) * 0.35)
         fig.update_layout(yaxis=dict(title="重度占比 %", gridcolor=GRID),
@@ -146,18 +148,17 @@ if page.startswith("①"):
         st.plotly_chart(fig, width="stretch")
     with b:
         st.markdown("**这段时间里发生了什么**")
-        peak = max(S["week_series"], key=lambda d: d["total"])
-        off = 100 - S["label_share"][0]["pct"]
+        peak = max(S["month_series"], key=lambda d: d["total"])
+        off = 100 - k["scale_covered_pct"]
         help_row = S["topic_detail"]["求助或告别"]
         base_row = S["topic_detail"]["直接说情绪"]
         st.markdown(
-            f"- 十二周共 {k['notes']} 条。第 {peak['week']} 周（{peak['start']} 起）"
-            f"{peak['total']} 条，是最高的一周——这一周正好是集中采集的时间，"
-            f"检索结果偏近期发布，所以这个峰不能读成“情绪在涨”。\n"
-            f"- 五类里“直接说情绪”占 {S['label_share'][0]['pct']}%，是能和量表对上的那部分；"
+            f"- 全部 {k['notes']} 条。{peak['label']} 最多（{peak['total']} 条），越往前越少，"
+            f"因为检索结果偏近期发布——这个峰不能读成“情绪在涨”。\n"
+            f"- 五类里“直接说情绪”占 {k['scale_covered_pct']}%，是能和量表对上的那部分；"
             f"其余四类合计 {off:.1f}%，问卷问不到。\n"
             f"- 重度表达集中在“求助或告别”里，占这一类的 {help_row['heavy_pct']}%，"
-            f"是“直接说情绪”（{base_row['heavy_pct']}%）的好几倍。"
+            f"是“直接说情绪”（{base_row['heavy_pct']}%）的几倍。"
             f"真正写到“撑不住、有人能说说话”的人，往往已经拖了很久。")
         st.caption("这几条是读数，不是结论。样本按关键词检索而来，时间上偏向采集的那几天。")
 
@@ -179,13 +180,14 @@ elif page.startswith("②"):
     left, right = st.columns([1, 1])
 
     with left:
-        st.markdown(f"**{cur} · 每周条数**")
+        st.markdown(f"**{cur} · 每月条数**")
         fig = go.Figure(go.Scatter(
-            x=[f"W{i+1}" for i in range(12)], y=d["week"], mode="lines+markers",
+            x=[r["label"] for r in S["month_series"]], y=d["month"], mode="lines+markers",
             line=dict(color=c, width=2.2), marker=dict(size=6),
             fill="tozeroy", fillcolor=rgba(c, 0.12),
             hovertemplate="%{x}：%{y} 条<extra></extra>"))
         base_layout(fig, height=250)
+        fig.update_xaxes(tickmode="array", tickvals=[r["label"] for r in S["month_series"]][::2])
         st.plotly_chart(fig, width="stretch")
 
         st.markdown("**严重程度分布**")
@@ -228,18 +230,18 @@ elif page.startswith("②"):
 
 # ---------------------------------------------------------------- ③ 节律
 else:
-    st.markdown("## 节律 · 什么时候最多，哪几周最难受")
-    st.caption("把周次和主题交叉起来看，比看总数更能看出是哪一类在涨。")
+    st.markdown("## 节律 · 什么时候最多，哪一类在涨")
+    st.caption("把月份和主题交叉起来看，比看总数更能看出是哪一类在动。")
 
     left, right = st.columns([1.15, 1])
 
     with left:
-        st.markdown("**学期节律 · 周次 × 主题**")
-        hw = S["heat_wl"]
+        st.markdown("**月度节律 · 月份 × 主题**")
+        hw = S["heat_ml"]
         z = hw["matrix"]
         text = [[str(v) for v in row] for row in z]
         fig = go.Figure(go.Heatmap(
-            z=z, x=hw["weeks"], y=hw["labels"], text=text, texttemplate="%{text}",
+            z=z, x=hw["months"], y=hw["labels"], text=text, texttemplate="%{text}",
             textfont=dict(size=11, family=FONT),
             colorscale=[[0, "#f5f1e8"], [1, "#7d2a33"]],
             hovertemplate="%{y} · %{x}：%{z} 条<extra></extra>",
@@ -248,33 +250,33 @@ else:
         st.plotly_chart(fig, width="stretch")
 
     with right:
-        st.markdown("**危机信号 · 每周条数**")
-        cw = pd.DataFrame(S["crisis"]["weekly"])
+        st.markdown("**危机信号 · 每月条数**")
+        cw = pd.DataFrame(S["crisis"]["monthly"])
         fig = go.Figure(go.Bar(
-            x=[f"W{w}" for w in cw["week"]], y=cw["n"], marker_color="#8c2f39",
+            x=cw["label"], y=cw["n"], marker_color="#8c2f39",
             text=cw["n"], textposition="outside",
             hovertemplate="%{x}：%{y} 条<extra></extra>"))
         base_layout(fig, height=340)
         st.plotly_chart(fig, width="stretch")
 
         cs = S["crisis"]
-        st.caption(f"十二周共 {cs['total']} 条带危机信号，占 {k['crisis_pct']}%，"
-                   f"最多的一周是 W{cs['peak_week']}（{cs['peak_n']} 条），"
-                   f"那一周正是集中采集的时间。这个数字只做群体计数，不能用来判断任何一个人。")
+        st.caption(f"全部 {cs['total']} 条带危机信号，占 {k['crisis_pct']}%，"
+                   f"最多的是 {cs['peak_month']}（{cs['peak_n']} 条），"
+                   f"那正是集中采集的那个月。这个数字只做群体计数，不能用来判断任何一个人。")
 
     st.divider()
-    peak = max(S["week_series"], key=lambda d: d["total"])
-    off = 100 - S["label_share"][0]["pct"]
+    peak = max(S["month_series"], key=lambda d: d["total"])
+    off = 100 - k["scale_covered_pct"]
     a, b, c3 = st.columns(3)
     a.markdown("**一 / 总量**")
-    a.markdown(f"十二周共 {k['notes']} 条。W{peak['week']} 最多（{peak['total']} 条），"
-               f"前面几周大多在 20 条上下——那一周是集中采集的时间，不代表情绪真的变多。")
+    a.markdown(f"全部 {k['notes']} 条。{peak['label']} 最多（{peak['total']} 条），"
+               f"三个月前每月还只有二三十条——越靠近采集时点越多，不代表情绪真的变多。")
     b.markdown("**二 / 结构**")
-    b.markdown(f"能和量表对上的只有一类，占 {S['label_share'][0]['pct']}%；"
+    b.markdown(f"能和量表对上的只有一类，占 {k['scale_covered_pct']}%；"
                f"另外四类合计 {off:.1f}%，问卷问不到。")
     c3.markdown("**三 / 节律**")
-    c3.markdown("危机信号 W11–W12 比前面几周多，但这两个周同时是采集最密的两周，"
-                "所以只能看出“这几天的样本里有”，不能当成学期的季节节律。")
+    c3.markdown("危机信号在最近三个月明显更密，但这三个月同时是采集最密的时候，"
+                "所以只能看出“这批样本里有”，不能当成学期的季节节律。")
 
 st.divider()
 st.caption("**伦理边界**　只采公开可见内容 · 入库即脱敏 · 危机信号只做群体计数 · 不做个体预警"
